@@ -177,6 +177,7 @@ fn install_compact_titlebar(window: &tauri::WebviewWindow) -> tauri::Result<()> 
 
 #[cfg(target_os = "linux")]
 fn install_web_notifications(window: &tauri::WebviewWindow) -> tauri::Result<()> {
+    let app_handle = window.app_handle().clone();
     window.with_webview(|platform_webview| {
         use gtk::glib::prelude::*;
         use webkit2gtk::{NotificationExt, PermissionRequestExt, WebViewExt};
@@ -187,6 +188,7 @@ fn install_web_notifications(window: &tauri::WebviewWindow) -> tauri::Result<()>
                 .downcast_ref::<webkit2gtk::NotificationPermissionRequest>()
                 .is_some()
             {
+                eprintln!("Đã cấp quyền thông báo cho Zalo Web");
                 request.allow();
                 true
             } else {
@@ -194,19 +196,40 @@ fn install_web_notifications(window: &tauri::WebviewWindow) -> tauri::Result<()>
             }
         });
 
-        webview.connect_show_notification(|_, notification| {
+        webview.connect_show_notification(move |_, notification| {
             let title = notification
                 .title()
                 .map(|value| value.to_string())
                 .unwrap_or_else(|| "Zalo".to_string());
-            let native = gtk::gio::Notification::new(&title);
-            if let Some(body) = notification.body() {
-                native.set_body(Some(body.as_str()));
-            }
-            native.set_icon(&gtk::gio::ThemedIcon::new("zalo-tauri"));
+            let body = notification
+                .body()
+                .map(|value| value.to_string())
+                .unwrap_or_default();
 
-            if let Some(app) = gtk::gio::Application::default() {
-                app.send_notification(Some(&format!("zalo-{}", notification.id())), &native);
+            // gio::Application::send_notification silently does nothing when the
+            // GTK application has no registered application ID. Tauri's Linux
+            // runtime does not guarantee that registration, so talk to the
+            // desktop notification service directly instead.
+            let result = notify_rust::Notification::new()
+                .appname("Zalo")
+                .summary(&title)
+                .body(&body)
+                .icon("zalo-tauri")
+                .action("default", "Mở Zalo")
+                .show();
+
+            match result {
+                Ok(handle) => {
+                    let app_handle = app_handle.clone();
+                    std::thread::spawn(move || {
+                        handle.wait_for_action(move |action| {
+                            if action == "default" {
+                                show_main_window(&app_handle);
+                            }
+                        });
+                    });
+                }
+                Err(error) => eprintln!("Không thể hiển thị thông báo Zalo: {error}"),
             }
             true
         });

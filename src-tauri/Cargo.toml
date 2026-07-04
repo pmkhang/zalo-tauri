@@ -1,6 +1,6 @@
 [package]
 name = "zalo-tauri"
-version = "0.1.0"
+version = "0.1.1"
 description = "Minimal Zalo Web wrapper for Linux"
 authors = ["pmkhang"]
 edition = "2021"
@@ -12,6 +12,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = ["tray-icon"] }
 tauri-plugin-single-instance = "2"
 gtk = "0.18"
+notify-rust = "4"
 webkit2gtk = "2.0.2"
 
 [features]
