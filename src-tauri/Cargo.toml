@@ -1,6 +1,6 @@
 [package]
 name = "zalo-tauri"
-version = "0.1.1"
+version = "0.1.2"
 description = "Minimal Zalo Web wrapper for Linux"
 authors = ["pmkhang"]
 edition = "2021"

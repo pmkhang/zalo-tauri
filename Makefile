@@ -39,16 +39,16 @@ help:
 deps:
 	@if command -v pacman >/dev/null 2>&1; then \
 		sudo pacman -Syu; \
-		sudo pacman -S --needed base-devel curl wget file openssl gtk3 webkit2gtk-4.1 libayatana-appindicator librsvg xdotool; \
+		sudo pacman -S --needed base-devel curl wget file openssl gtk3 webkit2gtk-4.1 libayatana-appindicator librsvg xdotool gst-plugins-good; \
 	elif command -v apt-get >/dev/null 2>&1; then \
 		sudo apt-get update; \
-		sudo apt-get install -y build-essential curl wget file libwebkit2gtk-4.1-dev libgtk-3-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev; \
+		sudo apt-get install -y build-essential curl wget file libwebkit2gtk-4.1-dev libgtk-3-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev gstreamer1.0-plugins-good; \
 	elif command -v dnf >/dev/null 2>&1; then \
 		sudo dnf group install -y 'c-development'; \
-		sudo dnf install -y webkit2gtk4.1-devel gtk3-devel openssl-devel curl wget file libappindicator-gtk3-devel librsvg2-devel libxdo-devel; \
+		sudo dnf install -y webkit2gtk4.1-devel gtk3-devel openssl-devel curl wget file libappindicator-gtk3-devel librsvg2-devel libxdo-devel gstreamer1-plugins-good; \
 	elif command -v zypper >/dev/null 2>&1; then \
 		sudo zypper --non-interactive install -t pattern devel_basis; \
-		sudo zypper --non-interactive install webkit2gtk3-devel gtk3-devel libopenssl-devel curl wget file libappindicator3-1 librsvg-devel; \
+		sudo zypper --non-interactive install webkit2gtk3-devel gtk3-devel libopenssl-devel curl wget file libappindicator3-1 librsvg-devel gstreamer-plugins-good; \
 	else \
 		echo 'Distro chưa được tự động nhận diện.' >&2; \
 		echo 'Xem mục Yêu cầu hệ thống trong README.md.' >&2; \
@@ -73,6 +73,12 @@ doctor:
 			failed=1; \
 		fi; \
 	done; \
+	if command -v gst-inspect-1.0 >/dev/null 2>&1 && gst-inspect-1.0 autoaudiosink >/dev/null 2>&1; then \
+		printf 'OK   GStreamer autoaudiosink\n'; \
+	else \
+		printf 'FAIL GStreamer autoaudiosink (cài plugins-good)\n'; \
+		failed=1; \
+	fi; \
 	exit $$failed
 
 check:

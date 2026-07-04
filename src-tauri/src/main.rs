@@ -224,7 +224,12 @@ fn install_web_notifications(window: &tauri::WebviewWindow) -> tauri::Result<()>
                     std::thread::spawn(move || {
                         handle.wait_for_action(move |action| {
                             if action == "default" {
-                                show_main_window(&app_handle);
+                                let window_app_handle = app_handle.clone();
+                                if let Err(error) = app_handle.run_on_main_thread(move || {
+                                    show_main_window(&window_app_handle);
+                                }) {
+                                    eprintln!("Không thể mở Zalo từ thông báo: {error}");
+                                }
                             }
                         });
                     });
