@@ -9,39 +9,92 @@
 - Đóng cửa sổ sẽ ẩn xuống system tray thay vì thoát.
 - Menu tray gồm **Mở Zalo**, **Ẩn Zalo** và **Thoát hoàn toàn**.
 - Chỉ cho phép một instance. Mở lần hai sẽ hiện và focus cửa sổ đang chạy.
-- Chuyển Web Notification của Zalo thành notification native KDE/Linux.
+- Chuyển Web Notification của Zalo thành notification native trên Linux.
 - Tự khởi động sau khi đăng nhập desktop.
 - Nội dung từ xa không được cấp Tauri command/capability.
 
 ## Yêu cầu hệ thống
 
-Project được phát triển và kiểm tra trên Arch Linux, KDE Plasma, Wayland.
+Ứng dụng chạy trên desktop Linux dùng GTK 3 và WebKitGTK 4.1, hỗ trợ cả Wayland lẫn X11. Project hiện được kiểm thử trực tiếp trên Arch Linux + KDE Plasma + Wayland; các lệnh bên dưới bao phủ những họ distro Linux phổ biến.
 
-Cài thư viện build cần thiết:
-
-```bash
-sudo pacman -S --needed base-devel gtk3 webkit2gtk-4.1 libayatana-appindicator
-```
-
-Cần Rust stable có `cargo` và `rustc`. Có thể dùng gói Arch:
+### Arch Linux / Manjaro / EndeavourOS
 
 ```bash
-sudo pacman -S --needed rust
+sudo pacman -Syu
+sudo pacman -S --needed \
+  base-devel curl wget file openssl \
+  gtk3 webkit2gtk-4.1 libayatana-appindicator librsvg xdotool
 ```
 
-Hoặc dùng `rustup` nếu hệ thống đã quản lý Rust theo cách đó. Kiểm tra toolchain:
+### Debian / Ubuntu / Linux Mint / Pop!_OS
+
+```bash
+sudo apt update
+sudo apt install -y \
+  build-essential curl wget file \
+  libwebkit2gtk-4.1-dev libgtk-3-dev libxdo-dev libssl-dev \
+  libayatana-appindicator3-dev librsvg2-dev
+```
+
+Ubuntu 22.04 và Debian 12 là baseline phù hợp vì repository chuẩn đã cung cấp WebKitGTK 4.1.
+
+### Fedora
+
+```bash
+sudo dnf check-update || true
+sudo dnf group install -y "c-development"
+sudo dnf install -y \
+  webkit2gtk4.1-devel gtk3-devel openssl-devel \
+  curl wget file libappindicator-gtk3-devel librsvg2-devel libxdo-devel
+```
+
+Trên Fedora Silverblue/Kinoite dùng cùng danh sách package với `rpm-ostree install`, sau đó reboot.
+
+### openSUSE Tumbleweed / Leap
+
+```bash
+sudo zypper refresh
+sudo zypper install -t pattern devel_basis
+sudo zypper install \
+  webkit2gtk3-devel gtk3-devel libopenssl-devel \
+  curl wget file libappindicator3-1 librsvg-devel
+```
+
+### Rust stable
+
+Cần `cargo` và `rustc`. Cách đồng nhất giữa các distro là cài Rust bằng `rustup`:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+rustup default stable
+```
+
+Nếu distro đã cung cấp Rust đủ mới, có thể dùng package manager của distro thay cho `rustup`. Kiểm tra toolchain:
 
 ```bash
 cargo --version
 rustc --version
 ```
 
-## Build
+Danh sách dependencies dựa trên [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/). Tên package có thể thay đổi theo phiên bản distro; nếu package manager không tìm thấy một package, hãy tra package tương đương cung cấp `webkit2gtk-4.1.pc` hoặc `ayatana-appindicator3-0.1.pc`.
 
-Đi vào thư mục project:
+Có thể để Makefile tự nhận diện một trong bốn họ distro trên và cài dependencies:
 
 ```bash
-cd ~/Desktop/zalo-tauri
+make deps
+make doctor
+```
+
+`make deps` sử dụng `sudo` và sẽ yêu cầu xác nhận quyền quản trị. `make doctor` chỉ kiểm tra, không thay đổi hệ thống.
+
+## Build
+
+Clone và đi vào thư mục project:
+
+```bash
+git clone https://github.com/pmkhang/zalo-tauri.git
+cd zalo-tauri
 ```
 
 Build release có tối ưu:
@@ -117,7 +170,7 @@ make restart
 - Double-click vùng title bar để phóng to hoặc khôi phục.
 - Chọn **Thoát hoàn toàn** trong menu tray để kết thúc tiến trình.
 
-Thông báo tin nhắn dùng notification native của desktop. Trong Zalo Web vẫn cần bật thông báo tại **Cài đặt → Thông báo** và KDE không được đặt ứng dụng ở chế độ tắt thông báo.
+Thông báo tin nhắn dùng notification native của desktop. Trong Zalo Web vẫn cần bật thông báo tại **Cài đặt → Thông báo** và môi trường desktop không được chặn thông báo của ứng dụng.
 
 ## Quản lý tiến trình
 
@@ -183,26 +236,32 @@ make start
 
 ### Không có tray icon
 
-KDE Plasma đã hỗ trợ StatusNotifierItem. Kiểm tra `libayatana-appindicator` đã được cài và khởi động lại app:
+KDE Plasma hỗ trợ tray sẵn. Với GNOME, có thể cần extension AppIndicator/KStatusNotifierItem. Đồng thời kiểm tra thư viện AppIndicator của distro đã được cài, rồi chạy:
 
 ```bash
-sudo pacman -S --needed libayatana-appindicator
 make restart
 ```
 
 ### Không nhận được thông báo
 
 1. Bật thông báo trong cài đặt Zalo Web.
-2. Kiểm tra **System Settings → Notifications** của KDE.
+2. Kiểm tra phần **Notifications** trong System Settings/Settings của desktop.
 3. Giữ ứng dụng chạy dưới tray.
 4. Xem log bằng `make logs`.
 
 ### Build lỗi do thiếu WebKitGTK
 
+Cài lại dependencies theo đúng mục distro ở trên. Có thể xác minh development package bằng:
+
 ```bash
-sudo pacman -S --needed webkit2gtk-4.1 gtk3
+pkg-config --modversion webkit2gtk-4.1
+pkg-config --modversion gtk+-3.0
 make build
 ```
+
+### Binary build trên distro này không chạy ở distro cũ hơn
+
+Binary Linux phụ thuộc glibc của hệ thống dùng để build. Muốn phát hành rộng, hãy build trên baseline cũ nhất cần hỗ trợ, ví dụ Ubuntu 22.04 hoặc Debian 12. Việc build trên distro rolling-release rồi chép binary sang distro cũ có thể gây lỗi phiên bản `GLIBC`.
 
 ### Muốn xem toàn bộ lệnh Makefile
 
