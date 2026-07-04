@@ -221,7 +221,16 @@ zalo-tauri/
     ├── Cargo.lock                 Phiên bản dependency đã khóa
     ├── tauri.conf.json            Cấu hình cửa sổ và bundle
     ├── icons/                     Icon ứng dụng
-    └── src/main.rs                Tray, title bar, notification, single-instance
+    └── src/
+        ├── main.rs                Entry point tối thiểu
+        ├── app.rs                 Khởi tạo và ghép các thành phần Tauri
+        ├── window.rs              Hiện, ẩn và xử lý đóng cửa sổ
+        ├── tray.rs                System tray và menu
+        └── linux/
+            ├── mod.rs             Tích hợp riêng cho Linux
+            ├── notifications.rs   Web notification và DBus native
+            ├── titlebar.rs        Hành vi title bar GTK
+            └── titlebar.css       Giao diện title bar
 ```
 
 ## Xử lý lỗi

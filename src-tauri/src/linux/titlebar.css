@@ -1,0 +1,47 @@
+headerbar.zalo-compact-titlebar {
+  min-height: 24px;
+  padding: 0 3px;
+  margin: 0;
+  border-radius: 0;
+}
+
+headerbar.zalo-compact-titlebar .zalo-title {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 0;
+  margin: 0;
+}
+
+headerbar.zalo-compact-titlebar .zalo-window-button {
+  min-width: 28px;
+  min-height: 20px;
+  padding: 0;
+  margin: 1px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  box-shadow: none;
+  transition: 120ms ease-out;
+}
+
+headerbar.zalo-compact-titlebar .zalo-window-button:hover {
+  background: alpha(currentColor, 0.10);
+}
+
+headerbar.zalo-compact-titlebar .zalo-window-button:active {
+  background: alpha(currentColor, 0.17);
+}
+
+headerbar.zalo-compact-titlebar .zalo-window-button image {
+  -gtk-icon-transform: scale(0.78);
+}
+
+headerbar.zalo-compact-titlebar .zalo-close-button:hover {
+  background: #e5484d;
+  color: white;
+}
+
+headerbar.zalo-compact-titlebar .zalo-close-button:active {
+  background: #c9363e;
+  color: white;
+}
