@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zalo
+Comment=Khởi động Zalo trong system tray
+Exec=@BINDIR@/zalo-tauri
+Icon=zalo-tauri
+Terminal=false
+X-KDE-autostart-after=panel
+X-GNOME-Autostart-enabled=true

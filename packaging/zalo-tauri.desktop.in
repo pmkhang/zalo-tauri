@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Zalo
+Comment=Zalo Web với system tray
+Exec=@BINDIR@/zalo-tauri
+Icon=zalo-tauri
+Terminal=false
+Categories=Network;InstantMessaging;
+StartupNotify=true
+StartupWMClass=vn.zalo.linuxwrapper
