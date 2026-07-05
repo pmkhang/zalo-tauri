@@ -279,3 +279,11 @@ Binary Linux phụ thuộc glibc của hệ thống dùng để build. Muốn ph
 ```bash
 make help
 ```
+
+## Giấy phép
+
+Mã nguồn wrapper này được phát hành theo [MIT License](LICENSE).
+
+Giấy phép không áp dụng cho Zalo, nội dung của Zalo hoặc các nhãn hiệu thuộc
+VNG Corporation và các chủ sở hữu tương ứng. Project này không liên kết hay
+được xác nhận chính thức bởi Zalo/VNG.
