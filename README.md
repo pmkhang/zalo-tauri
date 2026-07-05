@@ -229,6 +229,8 @@ zalo-tauri/
         └── linux/
             ├── mod.rs             Tích hợp riêng cho Linux
             ├── notifications.rs   Web notification và DBus native
+            ├── restore_notification_permission.js
+            │                      Khôi phục trạng thái quyền trước khi Zalo khởi tạo
             ├── titlebar.rs        Hành vi title bar GTK
             └── titlebar.css       Giao diện title bar
 ```

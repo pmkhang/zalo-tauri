@@ -1,6 +1,11 @@
 use gtk::glib::prelude::*;
 use tauri::Manager;
-use webkit2gtk::{NotificationExt, PermissionRequestExt, WebViewExt};
+use webkit2gtk::{
+    NotificationExt, PermissionRequestExt, SecurityOrigin, UserContentInjectedFrames,
+    UserContentManagerExt, UserScript, UserScriptInjectionTime, WebContextExt, WebViewExt,
+};
+
+const RESTORE_PERMISSION_SCRIPT: &str = include_str!("restore_notification_permission.js");
 
 pub(super) fn install(window: &tauri::WebviewWindow) -> tauri::Result<()> {
     let app_handle = window.app_handle().clone();
@@ -25,9 +30,45 @@ pub(super) fn install(window: &tauri::WebviewWindow) -> tauri::Result<()> {
             show_native_notification(&app_handle, notification);
             true
         });
+
+        initialize_notification_permission(&webview);
+        install_permission_restore_script(&webview);
+        webview.reload();
     })?;
 
     Ok(())
+}
+
+fn initialize_notification_permission(webview: &webkit2gtk::WebView) {
+    if let Some(context) = webview.context() {
+        context.connect_initialize_notification_permissions(|context| {
+            allow_zalo_notification_origin(context);
+        });
+        allow_zalo_notification_origin(&context);
+    } else {
+        eprintln!("Không thể khôi phục quyền thông báo: thiếu WebKit context");
+    }
+}
+
+fn install_permission_restore_script(webview: &webkit2gtk::WebView) {
+    let script = UserScript::new(
+        RESTORE_PERMISSION_SCRIPT,
+        UserContentInjectedFrames::TopFrame,
+        UserScriptInjectionTime::Start,
+        &[],
+        &[],
+    );
+
+    if let Some(content_manager) = webview.user_content_manager() {
+        content_manager.add_script(&script);
+    } else {
+        eprintln!("Không thể khôi phục quyền thông báo: thiếu WebKit content manager");
+    }
+}
+
+fn allow_zalo_notification_origin(context: &webkit2gtk::WebContext) {
+    let origin = SecurityOrigin::for_uri("https://chat.zalo.me");
+    context.initialize_notification_permissions(&[&origin], &[]);
 }
 
 fn show_native_notification(
